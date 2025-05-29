@@ -5,7 +5,9 @@
     <LangVersion>13.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Analysis -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- NuGet Audit -->
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
