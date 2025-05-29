@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="TerraAssistance.ProblemManagement.Application/TerraAssistance.ProblemManagement.Application.csproj" />
   <Project Path="TerraAssistance.ProblemManagement.Domain/TerraAssistance.ProblemManagement.Domain.csproj" />
 </Solution>
