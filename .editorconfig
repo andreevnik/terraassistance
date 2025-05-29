@@ -6,8 +6,14 @@ dotnet_diagnostic.SA0001.severity = none
 # SA1101: Prefix local calls with this
 dotnet_diagnostic.SA1101.severity = none
 
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
 # SA1413: Use trailing comma in multi-line initializers
 dotnet_diagnostic.SA1413.severity = silent
+
+# SA1503: Braces should not be omitted
+dotnet_diagnostic.SA1503.severity = silent
 
 # SA1600: Elements should be documented
 dotnet_diagnostic.SA1600.severity = silent

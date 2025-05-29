@@ -5,13 +5,13 @@ using TerraAssistance.ProblemManagement.Domain.Entities.Abstract;
 
 public class ProblemComment : Comment
 {
-    public ProblemComment(string content, int createdById)
-        : this(default, content, DateTime.UtcNow, createdById)
+    internal ProblemComment(string text, int createdById)
+        : this(default, text, DateTime.UtcNow, createdById)
     {
     }
 
-    protected ProblemComment(int id, string content, DateTime createdAt, int createdById)
-        : base(id, content, createdAt, createdById)
+    protected ProblemComment(int id, string text, DateTime createdAt, int createdById)
+        : base(id, text, createdAt, createdById)
     {
     }
 }
