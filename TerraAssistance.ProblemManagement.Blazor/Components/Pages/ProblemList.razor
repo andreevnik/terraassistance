@@ -1,0 +1,95 @@
+﻿@page "/problems"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using TerraAssistance.ProblemManagement.Blazor.Data
+@using TerraAssistance.ProblemManagement.Domain.Entities
+@using TerraAssistance.ProblemManagement.Domain.Enums
+@using TerraAssistance.ProblemManagement.Domain.Interfaces
+
+@inject IProblemRepository problemRepository
+@inject UserManager<ApplicationUser> userManager
+@inject IHttpContextAccessor httpContextAccessor
+@inject AuthenticationStateProvider authenticationStateProvider
+
+@attribute [StreamRendering]
+@attribute [Authorize]
+
+<PageTitle>Problems</PageTitle>
+
+<h1>Problems</h1>
+
+@if (problems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Author</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var problem in problems)
+            {
+                <tr>
+                    <td>@problem.Title</td>
+                    <td>@problem.CreatedAt</td>
+                    <td>@problem.Status</td>
+                    <td>@problem.Author</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<ProblemModel>? problems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cancellationToken = httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
+        var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+        var currentUser = userManager.GetUserAsync(authenticationState.User)
+        ?? throw new InvalidOperationException("User not found");
+
+        var users = await userManager.Users.ToDictionaryAsync(user => user.Id, user => user, cancellationToken);
+
+        var problemList = await problemRepository.GetAllAsync(cancellationToken);
+
+        problems = problemList.Select(problem => new ProblemModel(
+        problem,
+        problem.CreatedById == currentUser.Id
+            ? string.Empty
+            : users[problem.CreatedById].FirstName + " " + users[problem.CreatedById].LastName));
+    }
+
+    private sealed class ProblemModel
+    {
+        public ProblemModel(Problem problem, string author)
+        {
+            Id = problem.Id;
+            Title = problem.Title;
+            CreatedAt = problem.CreatedAt;
+            Status = problem.Status;
+            Author = author;
+        }
+
+        public int Id { get; }
+
+        public string Title { get; }
+
+        public DateTime CreatedAt { get; }
+
+        public ProblemStatus Status { get; }
+
+        public string Author { get; }
+    }
+}
