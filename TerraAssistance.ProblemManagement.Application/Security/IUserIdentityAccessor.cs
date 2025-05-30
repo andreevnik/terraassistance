@@ -3,13 +3,13 @@ namespace TerraAssistance.ProblemManagement.Application.Security;
 public interface IUserIdentityAccessor<TId>
     where TId : struct, IEquatable<TId>
 {
-    Task<IUserIdentity<TId>?> TryFindUserIdentityAsync(TId userId);
+    Task<IUserIdentity<TId>?> TryGetUserIdentityAsync(CancellationToken cancellationToken);
 
-    async Task<IUserIdentity<TId>> FindUserIdentityAsync(TId userId)
-        => await TryFindUserIdentityAsync(userId)
-            ?? throw new InvalidOperationException($"User identity with ID {userId} not found.");
+    async Task<IUserIdentity<TId>> GetUserIdentityAsync(CancellationToken cancellationToken)
+        => await TryGetUserIdentityAsync(cancellationToken)
+            ?? throw new InvalidOperationException("User identity is not available.");
 }
 
-public interface IUserIdentityAccessor : IUserIdentity<int>
+public interface IUserIdentityAccessor : IUserIdentityAccessor<int>
 {
 }
