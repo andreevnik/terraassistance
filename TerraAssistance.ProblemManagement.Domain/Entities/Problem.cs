@@ -8,7 +8,7 @@ public class Problem : Entity
     private readonly List<ProblemComment> _comments = new ();
 
     public Problem(string title, string? description, int createdById, DateTime? estimatedAt)
-        : this(default, createdById, title, description, ProblemStatus.New, DateTime.UtcNow, estimatedAt, null)
+        : this(default, createdById, title, description, ProblemStatus.New, DateTime.UtcNow, estimatedAt, null, null)
     {
     }
 
@@ -20,7 +20,8 @@ public class Problem : Entity
         ProblemStatus status,
         DateTime createdAt,
         DateTime? estimatedAt,
-        DateTime? closedAt)
+        DateTime? closedAt,
+        string? closeResolution)
     {
         Id = id;
         CreatedById = createdById;
@@ -30,6 +31,7 @@ public class Problem : Entity
         CreatedAt = createdAt;
         EstimatedAt = estimatedAt;
         ClosedAt = closedAt;
+        CloseResolution = closeResolution;
     }
 
     public int CreatedById { get; protected set; }
@@ -42,9 +44,11 @@ public class Problem : Entity
 
     public DateTime CreatedAt { get; protected set; }
 
+    public DateTime? EstimatedAt { get; protected set; }
+
     public DateTime? ClosedAt { get; protected set; }
 
-    public DateTime? EstimatedAt { get; protected set; }
+    public string? CloseResolution { get; protected set; }
 
     public IReadOnlyCollection<ProblemComment> Comments => _comments.AsReadOnly();
 
@@ -56,13 +60,14 @@ public class Problem : Entity
         Status = ProblemStatus.InProgress;
     }
 
-    public void Close()
+    public void Close(string? resolution)
     {
         if (Status != ProblemStatus.InProgress)
             throw new InvalidOperationException("Only problems in progress can be resolved.");
 
         Status = ProblemStatus.Closed;
         ClosedAt = DateTime.UtcNow;
+        CloseResolution = resolution;
     }
 
     public void AddComment(string text, int createdById)

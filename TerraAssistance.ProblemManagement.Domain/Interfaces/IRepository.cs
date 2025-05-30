@@ -16,7 +16,7 @@ public interface IRepository<TId, TEntity>
 
     void Update(TEntity entity);
 
-    void Remove(TEntity entity);
+    void Delete(TEntity entity);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }
