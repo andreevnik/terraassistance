@@ -8,4 +8,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TerraAssistance.ProblemManagement.Application\TerraAssistance.ProblemManagement.Application.csproj" />
+  </ItemGroup>
 </Project>
