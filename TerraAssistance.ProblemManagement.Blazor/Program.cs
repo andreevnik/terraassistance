@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using TerraAssistance.ProblemManagement.Blazor.Components;
 using TerraAssistance.ProblemManagement.Blazor.Components.Account;
 using TerraAssistance.ProblemManagement.Blazor.Data;
+using TerraAssistance.ProblemManagement.Blazor.Data.Repositories;
+using TerraAssistance.ProblemManagement.Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
+
+builder.Services.AddTransient<IProblemRepository, ProblemRepository>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
