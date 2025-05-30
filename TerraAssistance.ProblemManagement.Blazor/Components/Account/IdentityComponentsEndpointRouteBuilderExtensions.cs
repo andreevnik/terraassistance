@@ -1,3 +1,5 @@
+namespace Microsoft.AspNetCore.Routing;
+
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
@@ -10,7 +12,8 @@ using TerraAssistance.ProblemManagement.Blazor.Components.Account.Pages;
 using TerraAssistance.ProblemManagement.Blazor.Components.Account.Pages.Manage;
 using TerraAssistance.ProblemManagement.Blazor.Data;
 
-namespace Microsoft.AspNetCore.Routing;
+#pragma warning disable SA1009 // Closing parenthesis should be spaced correctly
+#pragma warning disable SA1010 // Opening square brackets should be spaced correctly
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
@@ -28,8 +31,8 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             [FromForm] string returnUrl) =>
         {
             IEnumerable<KeyValuePair<string, StringValues>> query = [
-                new("ReturnUrl", returnUrl),
-                new("Action", ExternalLogin.LoginCallbackAction)];
+                new ("ReturnUrl", returnUrl),
+                new ("Action", ExternalLogin.LoginCallbackAction)];
 
             var redirectUrl = UriHelper.BuildRelative(
                 context.Request.PathBase,

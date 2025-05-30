@@ -1,13 +1,13 @@
+namespace TerraAssistance.ProblemManagement.Blazor.Components.Account;
+
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Components;
-
-namespace TerraAssistance.ProblemManagement.Blazor.Components.Account;
 
 internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
 {
     public const string StatusCookieName = "Identity.StatusMessage";
 
-    private static readonly CookieBuilder StatusCookieBuilder = new()
+    private static readonly CookieBuilder StatusCookieBuilder = new ()
     {
         SameSite = SameSiteMode.Strict,
         HttpOnly = true,
@@ -15,10 +15,12 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
         MaxAge = TimeSpan.FromSeconds(5),
     };
 
+    private string CurrentPath => navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+
     [DoesNotReturn]
     public void RedirectTo(string? uri)
     {
-        uri ??= "";
+        uri ??= string.Empty;
 
         // Prevent open redirects.
         if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))
@@ -46,8 +48,6 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
         context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
         RedirectTo(uri);
     }
-
-    private string CurrentPath => navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
 
     [DoesNotReturn]
     public void RedirectToCurrentPage() => RedirectTo(CurrentPath);

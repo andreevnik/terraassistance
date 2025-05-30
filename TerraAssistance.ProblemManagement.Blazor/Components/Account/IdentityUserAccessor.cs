@@ -1,7 +1,7 @@
+namespace TerraAssistance.ProblemManagement.Blazor.Components.Account;
+
 using Microsoft.AspNetCore.Identity;
 using TerraAssistance.ProblemManagement.Blazor.Data;
-
-namespace TerraAssistance.ProblemManagement.Blazor.Components.Account;
 
 internal sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
 {
