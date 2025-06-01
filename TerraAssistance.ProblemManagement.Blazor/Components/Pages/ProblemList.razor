@@ -4,12 +4,13 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using TerraAssistance.ProblemManagement.Blazor.Data
+@using TerraAssistance.ProblemManagement.Blazor.Security
 @using TerraAssistance.ProblemManagement.Domain.Entities
 @using TerraAssistance.ProblemManagement.Domain.Enums
 @using TerraAssistance.ProblemManagement.Domain.Interfaces
 
 @inject IProblemRepository problemRepository
-@inject UserManager<ApplicationUser> userManager
+@inject UserManager userManager
 @inject IHttpContextAccessor httpContextAccessor
 @inject AuthenticationStateProvider authenticationStateProvider
 
@@ -57,7 +58,7 @@ else
         var cancellationToken = httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
         var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
 
-        var currentUser = userManager.GetUserAsync(authenticationState.User)
+        var currentUser = await userManager.GetUserAsync(authenticationState.User)
         ?? throw new InvalidOperationException("User not found");
 
         var users = await userManager.Users.ToDictionaryAsync(user => user.Id, user => user, cancellationToken);

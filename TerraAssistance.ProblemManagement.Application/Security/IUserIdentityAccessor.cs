@@ -1,15 +1,10 @@
 namespace TerraAssistance.ProblemManagement.Application.Security;
 
-public interface IUserIdentityAccessor<TId>
-    where TId : struct, IEquatable<TId>
+public interface IUserIdentityAccessor
 {
-    Task<IUserIdentity<TId>?> TryGetUserIdentityAsync(CancellationToken cancellationToken);
+    Task<UserIdentity?> TryGetUserIdentityAsync(CancellationToken cancellationToken);
 
-    async Task<IUserIdentity<TId>> GetUserIdentityAsync(CancellationToken cancellationToken)
+    async Task<UserIdentity> GetUserIdentityAsync(CancellationToken cancellationToken)
         => await TryGetUserIdentityAsync(cancellationToken)
             ?? throw new InvalidOperationException("User identity is not available.");
-}
-
-public interface IUserIdentityAccessor : IUserIdentityAccessor<int>
-{
 }

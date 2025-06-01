@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TerraAssistance.ProblemManagement.Application.Security;
 using TerraAssistance.ProblemManagement.Blazor.Components;
 using TerraAssistance.ProblemManagement.Blazor.Components.Account;
 using TerraAssistance.ProblemManagement.Blazor.Data;
 using TerraAssistance.ProblemManagement.Blazor.Data.Repositories;
+using TerraAssistance.ProblemManagement.Blazor.Security;
 using TerraAssistance.ProblemManagement.Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,12 +39,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddTransient<IProblemRepository, ProblemRepository>();
 
+builder.Services.AddTransient<IUserIdentityAccessor, UserIdentityAccessor>();
+
+var domainAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+    .Where(assembly => assembly.FullName?.StartsWith(nameof(TerraAssistance)) == true)
+    .ToArray();
+
+builder.Services.AddMediatR(configuration =>
+    configuration.RegisterServicesFromAssemblies(domainAssemblies));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddUserManager<UserManager>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
