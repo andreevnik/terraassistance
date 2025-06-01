@@ -1,0 +1,62 @@
+@page "/problems/create"
+
+@using MediatR
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using System.ComponentModel.DataAnnotations
+@using TerraAssistance.ProblemManagement.Application.Commands
+@using TerraAssistance.ProblemManagement.Blazor.Data
+@using TerraAssistance.ProblemManagement.Domain.Entities
+@using TerraAssistance.ProblemManagement.Domain.Interfaces
+
+@inject NavigationManager navigationManager
+@inject IMediator mediator
+@inject IHttpContextAccessor httpContextAccessor
+
+@attribute [Authorize]
+
+<PageTitle>Create Problem</PageTitle>
+
+<h3>Create New Problem</h3>
+
+<EditForm Model="problemModel" OnValidSubmit="HandleValidSubmit" FormName="createProblem" method="post">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="problemModel.Title" />
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="problemModel.Description" />
+    </div>
+    <div class="mb-3">
+        <label for="estimatedAt" class="form-label">Estimated Resolution Date</label>
+        <InputDate id="estimatedAt" class="form-control" @bind-Value="problemModel.EstimatedAt" />
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-secondary ms-2" href="problems">Cancel</a>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private ProblemInputModel problemModel { get; set; } = new();
+
+    private async Task HandleValidSubmit()
+    {
+        var cancellationToken = httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
+        var command = new AddProblemCommand(problemModel.Title, problemModel.Description, problemModel.EstimatedAt);
+        await mediator.Send(command, cancellationToken);
+        navigationManager.NavigateTo("/problems");
+    }
+
+    private sealed class ProblemInputModel
+    {
+        [Required]
+        public string Title { get; set; } = null!;
+
+        public string? Description { get; set; }
+
+        public DateTime? EstimatedAt { get; set; }
+    }
+}

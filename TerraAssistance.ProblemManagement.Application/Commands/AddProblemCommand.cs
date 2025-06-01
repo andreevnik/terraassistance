@@ -6,7 +6,7 @@ public class AddProblemCommand : IRequest
 {
     public AddProblemCommand(
         string title,
-        string description,
+        string? description,
         DateTime? estimatedAt)
     {
         Title = title;

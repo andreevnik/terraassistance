@@ -21,6 +21,10 @@
 
 <h1>Problems</h1>
 
+<a class="btn btn-primary mb-3" href="problems/create">
+    <span class="bi bi-plus-lg" aria-hidden="true"></span> Create New Problem
+</a>
+
 @if (problems == null)
 {
     <p><em>Loading...</em></p>
@@ -68,8 +72,8 @@ else
         problems = problemList.Select(problem => new ProblemModel(
         problem,
         problem.CreatedById == currentUser.Id
-            ? string.Empty
-            : users[problem.CreatedById].FirstName + " " + users[problem.CreatedById].LastName));
+        ? string.Empty
+        : users[problem.CreatedById].FirstName + " " + users[problem.CreatedById].LastName));
     }
 
     private sealed class ProblemModel
