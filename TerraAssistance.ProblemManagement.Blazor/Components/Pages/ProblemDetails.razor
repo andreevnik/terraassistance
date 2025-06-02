@@ -1,9 +1,13 @@
 @page "/problems/{Id:int}"
+@using MediatR
+@using Microsoft.EntityFrameworkCore
+@using TerraAssistance.ProblemManagement.Application.Commands
 @using TerraAssistance.ProblemManagement.Blazor.Data
 @using TerraAssistance.ProblemManagement.Blazor.Security
 @using TerraAssistance.ProblemManagement.Domain.Entities
 @using TerraAssistance.ProblemManagement.Domain.Enums
 @using TerraAssistance.ProblemManagement.Domain.Interfaces
+@using System.ComponentModel.DataAnnotations
 
 
 <div class="my-4">
@@ -28,6 +32,35 @@ else
             }
         </div>
     </div>
+
+    <div class="mt-4">
+        <h5>Comments</h5>
+        @if (Comments is null || !Comments.Any())
+        {
+            <p>No comments yet.</p>
+        }
+        else
+        {
+            <ul class="list-group mb-3">
+                @foreach (var comment in Comments)
+                {
+                    <li class="list-group-item">
+                        <div><strong>@comment.AuthorName</strong> <span class="text-muted" style="font-size:smaller">@comment.CreatedAt.ToString("g")</span></div>
+                        <div>@comment.Content</div>
+                    </li>
+                }
+            </ul>
+        }
+        <EditForm Model="NewComment" OnValidSubmit="AddCommentAsync" FormName="NewCommentForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <label for="commentContent" class="form-label">Add a comment</label>
+                <InputTextArea id="commentContent" class="form-control" @bind-Value="NewComment.Content" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Comment</button>
+        </EditForm>
+    </div>
 }
 
 @code {
@@ -38,14 +71,47 @@ else
     public IProblemRepository ProblemRepository { get; set; } = null!;
     [Inject]
     public UserManager UserManager { get; set; } = null!;
+    [Inject]
+    public IMediator Mediator { get; set; } = null!;
 
     public Problem? Problem { get; set; }
-
     public ApplicationUser? User { get; set; }
+    [SupplyParameterFromForm]
+    public NewCommentModel NewComment { get; set; } = new();
+    public IEnumerable<ProblemCommentViewModel>? Comments { get; set; } 
 
     protected override async Task OnInitializedAsync()
     {
+        var users = await UserManager.Users.ToDictionaryAsync(user => user.Id, user => user);
         Problem = await ProblemRepository.FindByIdAsync(Id, CancellationToken.None);
-        User = await UserManager.FindByIdAsync(Problem.CreatedById.ToString());
+        User = users[Problem.CreatedById];
+        Comments = Problem.Comments.Select(comment => new ProblemCommentViewModel
+        {
+            AuthorName = users[comment.CreatedById].FullName,
+            Content = comment.Text,
+            CreatedAt = comment.CreatedAt
+        });
+    }
+
+    private async Task AddCommentAsync()
+    {
+        var command = new AddProblemCommentCommand(Id, NewComment.Content);
+        await Mediator.Send(command);
+        NewComment = new NewCommentModel();
+        StateHasChanged();
+    }
+
+    public class NewCommentModel
+    {
+        [Required]
+        [StringLength(1000, MinimumLength = 1)]
+        public string Content { get; set; } = string.Empty;
+    }
+
+    public class ProblemCommentViewModel
+    {
+        public string AuthorName { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 }
