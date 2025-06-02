@@ -39,17 +39,39 @@
 }
 else
 {
-    <div class="mb-2">
-        <label>Sort by: </label>
-        <select @bind="sortField" class="form-select d-inline w-auto mx-2">
-            <option value="Title">Title</option>
-            <option value="CreatedAt">Date</option>
-            <option value="Status">Status</option>
-            <option value="Author">Author</option>
-        </select>
-        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleSortDirection">
-            @(sortDescending ? "Descending" : "Ascending")
-        </button>
+    <div class="mb-2 d-flex align-items-center gap-3 flex-wrap">
+        <div>
+            <label>Sort by: </label>
+            <select @bind="sortField" class="form-select d-inline w-auto mx-2">
+                <option value="Title">Title</option>
+                <option value="CreatedAt">Date</option>
+                <option value="Status">Status</option>
+                <option value="Author">Author</option>
+            </select>
+            <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleSortDirection">
+                @(sortDescending ? "Descending" : "Ascending")
+            </button>
+        </div>
+        <div>
+            <label>Status: </label>
+            <select @bind="filterStatus" class="form-select d-inline w-auto mx-2">
+                <option value="">All</option>
+                @foreach (var status in Enum.GetValues<ProblemStatus>())
+                {
+                    <option value="@status">@status</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label>Author: </label>
+            <select @bind="filterAuthor" class="form-select d-inline w-auto mx-2">
+                <option value="">All</option>
+                @foreach (var author in AuthorList)
+                {
+                    <option value="@author">@author</option>
+                }
+            </select>
+        </div>
     </div>
     <table class="table">
         <thead>
@@ -85,6 +107,9 @@ else
     private IEnumerable<ProblemModel>? problems;
     private string sortField = "CreatedAt";
     private bool sortDescending = true;
+    private string filterStatus = string.Empty;
+    private string filterAuthor = string.Empty;
+    private List<string> AuthorList = new();
 
     private IEnumerable<ProblemModel> SortedProblems
     {
@@ -93,12 +118,22 @@ else
             if (problems == null)
                 return Enumerable.Empty<ProblemModel>();
 
+            var filtered = problems;
+            if (!string.IsNullOrEmpty(filterStatus) && Enum.TryParse<ProblemStatus>(filterStatus, out var status))
+            {
+                filtered = filtered.Where(p => p.Status == status);
+            }
+            if (!string.IsNullOrEmpty(filterAuthor))
+            {
+                filtered = filtered.Where(p => p.Author == filterAuthor);
+            }
+
             return sortField switch
             {
-                "Title" => sortDescending ? problems.OrderByDescending(p => p.Title) : problems.OrderBy(p => p.Title),
-                "Status" => sortDescending ? problems.OrderByDescending(p => p.Status) : problems.OrderBy(p => p.Status),
-                "Author" => sortDescending ? problems.OrderByDescending(p => p.Author) : problems.OrderBy(p => p.Author),
-                _ => sortDescending ? problems.OrderByDescending(p => p.Id) : problems.OrderBy(p => p.Id)
+                "Title" => sortDescending ? filtered.OrderByDescending(p => p.Title) : filtered.OrderBy(p => p.Title),
+                "Status" => sortDescending ? filtered.OrderByDescending(p => p.Status) : filtered.OrderBy(p => p.Status),
+                "Author" => sortDescending ? filtered.OrderByDescending(p => p.Author) : filtered.OrderBy(p => p.Author),
+                _ => sortDescending ? filtered.OrderByDescending(p => p.Id) : filtered.OrderBy(p => p.Id)
             };
         }
     }
@@ -121,8 +156,9 @@ else
         var problemList = await problemRepository.GetAllAsync(cancellationToken);
 
         problems = problemList.Select(problem => new ProblemModel(
-        problem,
-        problem.CreatedById == currentUser.Id ? string.Empty : users[problem.CreatedById].FullName));
+            problem,
+            problem.CreatedById == currentUser.Id ? string.Empty : users[problem.CreatedById].FullName));
+        AuthorList = problems.Select(p => p.Author).Where(a => !string.IsNullOrEmpty(a)).Distinct().OrderBy(a => a).ToList();
     }
 
     private async Task DeleteProblemAsync(int problemId)
