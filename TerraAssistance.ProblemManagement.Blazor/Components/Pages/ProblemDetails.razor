@@ -1,14 +1,19 @@
 @page "/problems/{Id:int}"
 @using MediatR
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using TerraAssistance.ProblemManagement.Application.Commands
 @using TerraAssistance.ProblemManagement.Blazor.Data
+@using TerraAssistance.ProblemManagement.Blazor.Data.Constants
 @using TerraAssistance.ProblemManagement.Blazor.Security
 @using TerraAssistance.ProblemManagement.Domain.Entities
 @using TerraAssistance.ProblemManagement.Domain.Enums
 @using TerraAssistance.ProblemManagement.Domain.Interfaces
 @using System.ComponentModel.DataAnnotations
 
+@rendermode InteractiveServer
+
+@attribute [Authorize]
 
 <div class="my-4">
     <a class="btn btn-secondary ms-2" href="problems">Back to Problems</a>
@@ -24,11 +29,48 @@ else
         <div class="card-body">
             <h4 class="card-title">@Problem.Title</h4>
             <h6 class="card-subtitle mb-2 text-muted">@Problem.Status.ToString()</h6>
+            @if (Problem.Status == ProblemStatus.Closed && !string.IsNullOrWhiteSpace(Problem.CloseResolution))
+            {
+                <p class="card-text"><strong>Close Resolution:</strong> @Problem.CloseResolution</p>
+            }
             <p class="card-text"><strong>Created:</strong> @Problem.CreatedAt.ToString("g")</p>
             <p class="card-text"><strong>Author:</strong> @User.FullName</p>
             @if (!string.IsNullOrWhiteSpace(Problem.Description))
             {
                 <p class="card-text"><strong>Description:</strong> @Problem.Description</p>
+            }
+            <div class="mt-3">
+                @if (Problem.Status == ProblemStatus.New)
+                {
+                    <button class="btn btn-success me-2" @onclick="ActivateProblemAsync">Activate Problem</button>
+                }
+                @if (Problem.Status == ProblemStatus.InProgress)
+                {
+                    <button class="btn btn-danger" @onclick="ShowCancelModal">Close Problem</button>
+                }
+            </div>
+            @if (ShowCancelDialog)
+            {
+                <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Close Problem</h5>
+                                <button type="button" class="btn-close" @onclick="HideCancelModal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="resolutionInput" class="form-label">Resolution</label>
+                                    <InputTextArea id="resolutionInput" class="form-control" @bind-Value="CloseResolution" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" @onclick="HideCancelModal">Cancel</button>
+                                <button class="btn btn-danger" @onclick="ConfirmCloseProblemAsync">Close Problem</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     </div>
@@ -45,7 +87,8 @@ else
                 @foreach (var comment in Comments)
                 {
                     <li class="list-group-item">
-                        <div><strong>@comment.AuthorName</strong> <span class="text-muted" style="font-size:smaller">@comment.CreatedAt.ToString("g")</span></div>
+                        <div><strong>@comment.AuthorName</strong> <span class="text-muted"
+                                style="font-size:smaller">@comment.CreatedAt.ToString("g")</span></div>
                         <div>@comment.Content</div>
                     </li>
                 }
@@ -73,12 +116,17 @@ else
     public UserManager UserManager { get; set; } = null!;
     [Inject]
     public IMediator Mediator { get; set; } = null!;
+    [Inject]
+    public IJSRuntime JS { get; set; } = null!;
 
     public Problem? Problem { get; set; }
     public ApplicationUser? User { get; set; }
     [SupplyParameterFromForm]
     public NewCommentModel NewComment { get; set; } = new();
-    public IEnumerable<ProblemCommentViewModel>? Comments { get; set; } 
+    public IEnumerable<ProblemCommentViewModel>? Comments { get; set; }
+
+    private bool ShowCancelDialog { get; set; } = false;
+    private string CloseResolution { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,6 +147,42 @@ else
         await Mediator.Send(command);
         NewComment = new NewCommentModel();
         StateHasChanged();
+    }
+
+    private async Task ActivateProblemAsync()
+    {
+        var command = new ActivateProblemCommand(Id);
+        await DispatchCommand(command);
+    }
+
+    private void ShowCancelModal()
+    {
+        CloseResolution = string.Empty;
+        ShowCancelDialog = true;
+    }
+
+    private void HideCancelModal()
+    {
+        ShowCancelDialog = false;
+    }
+
+    private async Task ConfirmCloseProblemAsync()
+    {
+        ShowCancelDialog = false;
+        var command = new CloseProblemCommand(Id, CloseResolution);
+        await DispatchCommand(command);
+    }
+
+    private async Task DispatchCommand(IBaseRequest command)
+    {
+        try
+        {
+            await Mediator.Send(command);
+        }
+        catch (Exception exception)
+        {
+            await JS.InvokeVoidAsync(JsFunctionName.Alert, exception.Message);
+        }
     }
 
     public class NewCommentModel
