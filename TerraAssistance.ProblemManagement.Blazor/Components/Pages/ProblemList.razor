@@ -1,9 +1,12 @@
 ﻿@page "/problems"
 
+@using MediatR
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
+@using TerraAssistance.ProblemManagement.Application.Commands
 @using TerraAssistance.ProblemManagement.Blazor.Data
+@using TerraAssistance.ProblemManagement.Blazor.Data.Constants
 @using TerraAssistance.ProblemManagement.Blazor.Security
 @using TerraAssistance.ProblemManagement.Domain.Entities
 @using TerraAssistance.ProblemManagement.Domain.Enums
@@ -13,6 +16,10 @@
 @inject UserManager userManager
 @inject IHttpContextAccessor httpContextAccessor
 @inject AuthenticationStateProvider authenticationStateProvider
+@inject IJSRuntime jsRuntime
+@inject IMediator mediator
+
+@rendermode InteractiveServer
 
 @attribute [StreamRendering]
 @attribute [Authorize]
@@ -38,6 +45,7 @@ else
                 <th>Date</th>
                 <th>Status</th>
                 <th>Author</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -50,6 +58,10 @@ else
                     <td>@problem.CreatedAt</td>
                     <td>@problem.Status</td>
                     <td>@problem.Author</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger"
+                            @onclick="async () => await DeleteProblemAsync(problem.Id)">Delete</button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -74,6 +86,23 @@ else
         problems = problemList.Select(problem => new ProblemModel(
         problem,
         problem.CreatedById == currentUser.Id ? string.Empty : users[problem.CreatedById].FullName));
+    }
+
+    private async Task DeleteProblemAsync(int problemId)
+    {
+        var command = new DeleteProblemCommand(problemId);
+
+        try
+        {
+            await mediator.Send(command);
+        }
+        catch (Exception exception)
+        {
+            await jsRuntime.InvokeVoidAsync(JsFunctionName.Alert, exception.Message);
+        }
+
+        await jsRuntime.InvokeVoidAsync(JsFunctionName.Alert, "Problem deleted successfully.");
+        await OnInitializedAsync();
     }
 
     private sealed class ProblemModel
