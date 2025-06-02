@@ -1,0 +1,51 @@
+@page "/problems/{Id:int}"
+@using TerraAssistance.ProblemManagement.Blazor.Data
+@using TerraAssistance.ProblemManagement.Blazor.Security
+@using TerraAssistance.ProblemManagement.Domain.Entities
+@using TerraAssistance.ProblemManagement.Domain.Enums
+@using TerraAssistance.ProblemManagement.Domain.Interfaces
+
+
+<div class="my-4">
+    <a class="btn btn-secondary ms-2" href="problems">Back to Problems</a>
+</div>
+
+@if (Problem is null || User is null)
+{
+    <p><em>No problem selected.</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">@Problem.Title</h4>
+            <h6 class="card-subtitle mb-2 text-muted">@Problem.Status.ToString()</h6>
+            <p class="card-text"><strong>Created:</strong> @Problem.CreatedAt.ToString("g")</p>
+            <p class="card-text"><strong>Author:</strong> @User.FullName</p>
+            @if (!string.IsNullOrWhiteSpace(Problem.Description))
+            {
+                <p class="card-text"><strong>Description:</strong> @Problem.Description</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Inject]
+    public IProblemRepository ProblemRepository { get; set; } = null!;
+    [Inject]
+    public UserManager UserManager { get; set; } = null!;
+
+    public Problem? Problem { get; set; }
+
+    public ApplicationUser? User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Problem = await ProblemRepository.FindByIdAsync(Id, CancellationToken.None);
+        User = await UserManager.FindByIdAsync(Problem.CreatedById.ToString());
+    }
+}

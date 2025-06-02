@@ -44,7 +44,9 @@ else
             @foreach (var problem in problems)
             {
                 <tr>
-                    <td>@problem.Title</td>
+                    <td>
+                        <a href="problems/@problem.Id">@problem.Title</a>
+                    </td>
                     <td>@problem.CreatedAt</td>
                     <td>@problem.Status</td>
                     <td>@problem.Author</td>
@@ -71,9 +73,7 @@ else
 
         problems = problemList.Select(problem => new ProblemModel(
         problem,
-        problem.CreatedById == currentUser.Id
-        ? string.Empty
-        : users[problem.CreatedById].FirstName + " " + users[problem.CreatedById].LastName));
+        problem.CreatedById == currentUser.Id ? string.Empty : users[problem.CreatedById].FullName));
     }
 
     private sealed class ProblemModel
