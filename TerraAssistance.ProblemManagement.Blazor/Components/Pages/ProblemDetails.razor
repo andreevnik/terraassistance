@@ -31,9 +31,13 @@ else
             <h4 class="card-title">@Problem.Title</h4>
             <h6 class="card-subtitle mb-2 text-muted">@Problem.Status.ToString()</h6>
             <p class="card-text"><strong>Spent Time:</strong> @Problem.SpentTimeHours hours</p>
-            @if (Problem.Status == ProblemStatus.Closed && !string.IsNullOrWhiteSpace(Problem.CloseResolution))
+            @if (Problem.Status == ProblemStatus.Closed)
             {
-                <p class="card-text"><strong>Close Resolution:</strong> @Problem.CloseResolution</p>
+                <p class="card-text"><strong>Closed At:</strong> @Problem.ClosedAt?.ToString("g")</p>
+                @if (!string.IsNullOrWhiteSpace(Problem.CloseResolution))
+                {
+                    <p class="card-text"><strong>Close Resolution:</strong> @Problem.CloseResolution</p>
+                }
             }
             <p class="card-text"><strong>Created:</strong> @Problem.CreatedAt.ToString("g")</p>
             <p class="card-text"><strong>Author:</strong> @User.FullName</p>
