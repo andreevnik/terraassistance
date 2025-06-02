@@ -41,7 +41,7 @@ public abstract class Repository<TEntity, TId> : IRepository<TId, TEntity>
     public async Task<TEntity> FindByIdAsync(TId id, CancellationToken cancellationToken)
     {
         return await TryFindByIdAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Entity with ID {id} not found.");
+            ?? throw new KeyNotFoundException($"{typeof(TEntity).Name} with ID {id} not found.");
     }
 
     public async Task<IReadOnlyCollection<TEntity>> GetAllAsync(CancellationToken cancellationToken)
