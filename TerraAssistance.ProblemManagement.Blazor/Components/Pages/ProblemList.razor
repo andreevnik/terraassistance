@@ -39,6 +39,18 @@
 }
 else
 {
+    <div class="mb-2">
+        <label>Sort by: </label>
+        <select @bind="sortField" class="form-select d-inline w-auto mx-2">
+            <option value="Title">Title</option>
+            <option value="CreatedAt">Date</option>
+            <option value="Status">Status</option>
+            <option value="Author">Author</option>
+        </select>
+        <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleSortDirection">
+            @(sortDescending ? "Descending" : "Ascending")
+        </button>
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -50,7 +62,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var problem in problems)
+            @foreach (var problem in SortedProblems)
             {
                 <tr>
                     <td>
@@ -71,6 +83,30 @@ else
 
 @code {
     private IEnumerable<ProblemModel>? problems;
+    private string sortField = "CreatedAt";
+    private bool sortDescending = true;
+
+    private IEnumerable<ProblemModel> SortedProblems
+    {
+        get
+        {
+            if (problems == null)
+                return Enumerable.Empty<ProblemModel>();
+
+            return sortField switch
+            {
+                "Title" => sortDescending ? problems.OrderByDescending(p => p.Title) : problems.OrderBy(p => p.Title),
+                "Status" => sortDescending ? problems.OrderByDescending(p => p.Status) : problems.OrderBy(p => p.Status),
+                "Author" => sortDescending ? problems.OrderByDescending(p => p.Author) : problems.OrderBy(p => p.Author),
+                _ => sortDescending ? problems.OrderByDescending(p => p.Id) : problems.OrderBy(p => p.Id)
+            };
+        }
+    }
+
+    private void ToggleSortDirection()
+    {
+        sortDescending = !sortDescending;
+    }
 
     protected override async Task OnInitializedAsync()
     {
