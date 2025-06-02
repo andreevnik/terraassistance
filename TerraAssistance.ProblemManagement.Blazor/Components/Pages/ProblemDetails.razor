@@ -5,6 +5,7 @@
 @using TerraAssistance.ProblemManagement.Application.Commands
 @using TerraAssistance.ProblemManagement.Blazor.Data
 @using TerraAssistance.ProblemManagement.Blazor.Data.Constants
+@using TerraAssistance.ProblemManagement.Blazor.Extensions
 @using TerraAssistance.ProblemManagement.Blazor.Security
 @using TerraAssistance.ProblemManagement.Domain.Entities
 @using TerraAssistance.ProblemManagement.Domain.Enums
@@ -181,7 +182,7 @@ else
         }
         catch (Exception exception)
         {
-            await JS.InvokeVoidAsync(JsFunctionName.Alert, exception.Message);
+            await JS.ShowError(exception);
         }
     }
 

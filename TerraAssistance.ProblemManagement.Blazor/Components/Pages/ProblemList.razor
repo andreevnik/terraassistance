@@ -7,6 +7,7 @@
 @using TerraAssistance.ProblemManagement.Application.Commands
 @using TerraAssistance.ProblemManagement.Blazor.Data
 @using TerraAssistance.ProblemManagement.Blazor.Data.Constants
+@using TerraAssistance.ProblemManagement.Blazor.Extensions
 @using TerraAssistance.ProblemManagement.Blazor.Security
 @using TerraAssistance.ProblemManagement.Domain.Entities
 @using TerraAssistance.ProblemManagement.Domain.Enums
@@ -98,10 +99,10 @@ else
         }
         catch (Exception exception)
         {
-            await jsRuntime.InvokeVoidAsync(JsFunctionName.Alert, exception.Message);
+            await jsRuntime.ShowError(exception);
         }
 
-        await jsRuntime.InvokeVoidAsync(JsFunctionName.Alert, "Problem deleted successfully.");
+        await jsRuntime.ShowMessage("Problem deleted successfully.");
         await OnInitializedAsync();
     }
 
