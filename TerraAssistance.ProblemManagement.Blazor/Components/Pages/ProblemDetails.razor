@@ -30,6 +30,7 @@ else
         <div class="card-body">
             <h4 class="card-title">@Problem.Title</h4>
             <h6 class="card-subtitle mb-2 text-muted">@Problem.Status.ToString()</h6>
+            <p class="card-text"><strong>Spent Time:</strong> @Problem.SpentTimeHours hours</p>
             @if (Problem.Status == ProblemStatus.Closed && !string.IsNullOrWhiteSpace(Problem.CloseResolution))
             {
                 <p class="card-text"><strong>Close Resolution:</strong> @Problem.CloseResolution</p>
@@ -47,7 +48,17 @@ else
                 }
                 @if (Problem.Status == ProblemStatus.InProgress)
                 {
-                    <button class="btn btn-danger" @onclick="ShowCancelModal">Close Problem</button>
+                    <div class="d-flex align-items-start gap-3">
+                        <button class="btn btn-danger" @onclick="ShowCancelModal">Close Problem</button>
+                        <EditForm Model="SpentTimeModel" OnValidSubmit="AddSpentTimeAsync" class="d-flex">
+                            <DataAnnotationsValidator />
+                            <div class="input-group" style="width: 200px;">
+                                <InputNumber class="form-control" @bind-Value="SpentTimeModel.Hours" min="1"
+                                    placeholder="Hours" />
+                                <button class="btn btn-primary" type="submit">Add Time</button>
+                            </div>
+                        </EditForm>
+                    </div>
                 }
             </div>
             @if (ShowCancelDialog)
@@ -125,6 +136,7 @@ else
     [SupplyParameterFromForm]
     public NewCommentModel NewComment { get; set; } = new();
     public IEnumerable<ProblemCommentViewModel>? Comments { get; set; }
+    public SpentTimeInputModel SpentTimeModel { get; set; } = new();
 
     private bool ShowCancelDialog { get; set; } = false;
     private string CloseResolution { get; set; } = string.Empty;
@@ -174,6 +186,13 @@ else
         await DispatchCommand(command);
     }
 
+    private async Task AddSpentTimeAsync()
+    {
+        await Mediator.Send(new AddSpentTimeCommand(Id, SpentTimeModel.Hours));
+        SpentTimeModel = new SpentTimeInputModel();
+        StateHasChanged();
+    }
+
     private async Task DispatchCommand(IBaseRequest command)
     {
         try
@@ -198,5 +217,12 @@ else
         public string AuthorName { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class SpentTimeInputModel
+    {
+        [Required]
+        [Range(1, 1000)]
+        public int Hours { get; set; }
     }
 }

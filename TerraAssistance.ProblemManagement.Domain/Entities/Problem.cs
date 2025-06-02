@@ -8,13 +8,14 @@ public class Problem : Entity
     private readonly List<ProblemComment> _comments = new ();
 
     public Problem(string title, string? description, int createdById, DateTime? estimatedAt)
-        : this(default, createdById, title, description, ProblemStatus.New, DateTime.UtcNow, estimatedAt, null, null)
+        : this(default, createdById, 0, title, description, ProblemStatus.New, DateTime.UtcNow, estimatedAt, null, null)
     {
     }
 
     protected Problem(
         int id,
         int createdById,
+        int spentTimeHours,
         string title,
         string? description,
         ProblemStatus status,
@@ -25,6 +26,7 @@ public class Problem : Entity
     {
         Id = id;
         CreatedById = createdById;
+        SpentTimeHours = spentTimeHours;
         Title = title;
         Description = description;
         Status = status;
@@ -35,6 +37,8 @@ public class Problem : Entity
     }
 
     public int CreatedById { get; protected set; }
+
+    public int SpentTimeHours { get; protected set; }
 
     public string Title { get; protected set; }
 
@@ -68,6 +72,14 @@ public class Problem : Entity
         Status = ProblemStatus.Closed;
         ClosedAt = DateTime.UtcNow;
         CloseResolution = resolution;
+    }
+
+    public void AddSpentTime(int hours)
+    {
+        if (hours < 0)
+            throw new ArgumentOutOfRangeException(nameof(hours), "Spent time cannot be negative.");
+
+        SpentTimeHours += hours;
     }
 
     public void AddComment(string text, int createdById)
