@@ -23,3 +23,6 @@ dotnet_diagnostic.SA1602.severity = silent
 
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = silent
+
+# IDE0005: Using directive is unnecessary
+dotnet_diagnostic.IDE0005.severity = warning
