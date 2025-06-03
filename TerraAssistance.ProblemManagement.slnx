@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Tests/">
+    <Project Path="Tests/TerraAssistance.ProblemManagement.Application.Tests/TerraAssistance.ProblemManagement.Application.Tests.csproj" />
     <Project Path="Tests/TerraAssistance.ProblemManagement.Domain.Tests/TerraAssistance.ProblemManagement.Domain.Tests.csproj" />
   </Folder>
   <Project Path="TerraAssistance.ProblemManagement.Application/TerraAssistance.ProblemManagement.Application.csproj" />
